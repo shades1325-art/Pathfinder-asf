@@ -69,7 +69,7 @@ npcExce["Goldenrod City Station_A"] = {
 npcExce["Goldenrod City Station_B"] = {
     ["Goldenrod City Station_A"] = {{9, 7}, "Yes", "Would you like to return to the Goldenrod lobby?"}
 }
-npcExce["Johto Safari Zone Lobby"] = {
+npcExce["Johto  Zone Lobby"] = {
     ["Johto Safari Entrance"] = {{21, 6}, "Yes", "Would you like to enter the safari zone for $5,000 today?"},
 }
 npcExce["Route 40"] = {
@@ -155,6 +155,9 @@ npcExce["Slateport City"] = {
 npcExce["Crater Town Shore"] = {
       ["Slateport City"] = {{6, 5}, 1, "I can sail to Slateport City if you want. Since you have a transit pass, the tour will be free of charge. Are you interested?"}
 }
+npcExce["Hoenn Safari Zone Lobby"] = {
+    ["Hoenn Safari Zone Area 1"] = {{21, 6}, 1, "Hello! Welcome to the Hoenn Safari Zone! ..."},
+}
 ----------------------
 ------ SINNOH ---------
 ----------------------
@@ -169,7 +172,9 @@ npcExce["Fight Area"] = {
 npcExce["Sinnoh Safari Stop"] = {
       ["Sinnoh Safari Area Zone 2"] = {{6, 3}, "24 Hour Pass ($50,000)", "Hello! Welcome to the Sinnoh Safari Zone! We have some options for access today! Would you like to enter the Safari Zone?"}
 }
-
+npcExce["Hoenn Safari Zone Area 1"] = {
+    ["Hoenn Safari Zone Lobby"] = {{24, 47}, 1, "Are you sure you want to leave the Safari Zone?"},
+}
 
 ----------------------
 ---- Sevii Islands ----
