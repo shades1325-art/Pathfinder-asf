@@ -263,9 +263,11 @@ local function isSameMap(n1, n2)
     return n1:gsub("_%u$", "") == n2:gsub("_%u$", "")
 end
 
--- check if the nodes are the same map
+-- An explicit region is an exact destination, not merely the physical map.
+-- Keep generic-map callers compatible; isSameMap remains the physical check.
 local function isDestination(n1, n2)
     n1, n2 = canonicalMapName(n1), canonicalMapName(n2)
+    if n2:match("_%u$") and n1 ~= n2 then return false end
     return n1:gsub("_%u$", "") == n2:gsub("_%u$", "") and not exceptionExist(npcExceptions, n1, n2) and not exceptionExist(digways, n1, n2) and not exceptionExist(mapExceptions, n1, n2)
 end
 

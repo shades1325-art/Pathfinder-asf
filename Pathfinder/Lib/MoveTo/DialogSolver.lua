@@ -14,6 +14,11 @@ local transportDestinations = transportConfig.destinations
 
 local digUndiscovered       = "I better not venture in"
 local useDigway             = {"Do you want to attempt to use it?", "Do you want to attempt to use it? It leads to one of these outlets.","Where do you want to go?"}
+local digIntroduction       = "It looks like this burrow could potentially be used to bypass the cave."
+local digState              = {}
+local function resetDigState()
+    digState = {}
+end
 local useDive               = {"These look like deeper waters. Do you want to Dive here?", "Do you want to Dive here?", "Do you want to go to the surface?"}
 local transportState        = {
     subway = {destination = nil, page = 1},
@@ -81,6 +86,34 @@ local function readDigChoices(choices)
     return parsed
 end
 
+-- A shared burrow can deliver the question and its menu in separate callbacks.
+-- LuaScript also puts options[0] in choices.prompt, even when it is the first
+-- outlet (or the entire numbered list), not a repeated question. Restore it
+-- locally; do not change the callback contract for other scripts/dialogs.
+local function splitDigChoices(n1, message, choices)
+    local head = message
+    if (head == nil or head == "") and type(choices) == "table" then
+        head = choices.prompt
+    end
+    head = type(head) == "string" and head or ""
+    local text = digChoiceText(head)
+    if not text:match("^%d+[%.)]%s*") then
+        -- Unnumbered options must have a known outlet in the prompt field;
+        -- an ordinary question/party selector must not become a Dig menu.
+        if type(choices) ~= "table" or #choices == 0 or choices.prompt ~= head then return nil end
+        local known = text == "cancel"
+        for destination, edge in pairs(digways[n1]) do
+            if text == digChoiceText(edge.menuName or destination:gsub("_%u$", "")) then known = true end
+        end
+        if not known then return nil end
+    end
+    local menu = {head}
+    if type(choices) == "table" then
+        for i = 1, math.min(#choices, 17) do menu[#menu + 1] = choices[i] end
+    end
+    return menu
+end
+
 local function solveDigway(n1, n2, digIndex, message, choices, pf)
     local exce = digways[n1][n2]
     local pushLog = "Pathfinder: Pushing dialog:"
@@ -92,7 +125,17 @@ local function solveDigway(n1, n2, digIndex, message, choices, pf)
         -- mean Cancel, not Mt. Silver. Never prequeue that index at a prior
         -- yes/no prompt or guess when the authoritative menu lacks the target.
         if message~="Where do you want to go?" then
+            resetDigState()
+            digState.from, digState.to = n1, n2
             pushDialogAnswer(1)
+            return true
+        end
+        if digState.phase == "selected" then return true end
+        digState.from, digState.to, digState.phase = n1, n2, "waiting"
+        if type(choices) ~= "table" or #choices == 0 then
+            -- This is a question, not yet a selection menu. Queue nothing:
+            -- status-1 continuation must not leave a stale 0 ahead of the
+            -- outlet answer when the subsequent menu callback arrives.
             return true
         end
         local menu,reason=readDigChoices(choices)
@@ -106,6 +149,7 @@ local function solveDigway(n1, n2, digIndex, message, choices, pf)
             if text=="cancel" then cancel=i end
         end
         if not selected or ambiguous then
+            digState.phase = "selected"
             -- A fatal Lua callback alone leaves the host's default answer 1.
             -- Queue a known Cancel, or NON-slot 0 when the mapping is unknown.
             -- Server handling of 0 is unverified; never guess a destination.
@@ -118,11 +162,13 @@ local function solveDigway(n1, n2, digIndex, message, choices, pf)
                 ..(reason or (ambiguous and "ambiguous destination" or "destination absent from menu")))
         end
         if not (type(digIndex)=="number" and digIndex%1==0 and digIndex>=1 and digIndex<=6) then
+            digState.phase = "selected"
             pushDialogAnswer(cancel or 0)
             error("Pathfinder --> Invalid Dig party slot")
         end
         pushDialogAnswer(selected)
         pushDialogAnswer(digIndex)
+        digState.phase = "selected"
         log("Pathfinder: Dig destination selected: "..n2.."; answer="..selected)
         return true
     end
@@ -281,11 +327,25 @@ end
 local function solveDialog(message, pf, choices)
     local n1 = pf.from
     local n2 = pf.toMap
+    if digState.from ~= n1 or digState.to ~= n2 then resetDigState() end
     if pf.exceptionExist(npcExceptions, n1, n2) then
         return solveNpc(message, n1, n2)
-    elseif Lib.inTable(useDigway, message) and pf.exceptionExist(digways, n1, n2) and pf.isDigPathEnabled() then
-        return solveDigway(n1, n2, pf.abilitiesIndex.dig, message, choices, pf)
-    elseif Lib.inTable(useDive, message) then
+    end
+    if pf.exceptionExist(digways, n1, n2) and pf.isDigPathEnabled() then
+        if message == digIntroduction then
+            resetDigState()
+            digState.from, digState.to = n1, n2
+            return true
+        elseif Lib.inTable(useDigway, message) then
+            return solveDigway(n1, n2, pf.abilitiesIndex.dig, message, choices, pf)
+        elseif digState.phase then
+            local menu = splitDigChoices(n1, message, choices)
+            if menu then
+                return solveDigway(n1, n2, pf.abilitiesIndex.dig, "Where do you want to go?", menu, pf)
+            end
+        end
+    end
+    if Lib.inTable(useDive, message) then
         return solveDive(pf.abilitiesIndex.dive)
     elseif solveOutlet(message, pf) then
         return
@@ -302,11 +362,13 @@ local function solveDialog(message, pf, choices)
 end
 
 local function onDialogSolverStart()
+    resetDigState()
     npcExceptions = _npcExceptions()
     resetTransportState("subway")
     resetTransportState("teleport")
 end
 
 registerHook("onStart", onDialogSolverStart)
+registerHook("onStop", resetDigState)
 
 return { solveDialog = solveDialog }

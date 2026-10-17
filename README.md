@@ -167,10 +167,13 @@ từ node nguồn. `MapExceptions` được xử lý trước `MapLink`; chỉ s
   spawn đúng giờ, membership và không fishing-only. Không cắt danh sách 50 map.
 - Giữ đích ổn định khi đi đường; không tìm cỏ ở map hiện tại khi vừa chọn bãi
   hoặc đi tới bãi thất bại. Hai lần từ chối tại cùng vị trí sẽ đổi tuyến/bãi.
-- Patrol hai ô encounter liền kề trong đúng node, tránh NPC và đường qua map
-  link; không chọn cỏ/rectangle ngẫu nhiên trên toàn map.
+- Patrol dải thẳng **tối đa 4 ô encounter** (2–3 ô nếu bãi hẹp), đi qua lại
+  giữa hai đầu trong đúng node. Kiểm tra cả ô giữa, NPC, map link và đường
+  tiếp cận trước mỗi action; không chọn cỏ/rectangle ngẫu nhiên trên toàn map.
 - Land dùng grass, hoặc normal ground trong nhà khi không có grass hợp lệ;
-  Surf dùng water. Không mặc định normal ground ngoài trời có encounter.
+  Surf dùng water. Riêng **Sky Pillar 3F** có Land spawn trên plain floor dù
+  map được đánh dấu Outside; không mặc định mọi normal ground ngoài trời có
+  encounter. Giữ nguyên điều kiện giờ/membership, kể cả Spiritomb member-only.
 - Giới hạn 24 local-path checks / 8 blocked-route searches mỗi callback.
   Không thêm thời gian chờ giữa các bước patrol thành công.
 - Giữ luồng quest/bắt Pokémon/PC và file trạng thái; cập nhật script cùng helper.
@@ -180,6 +183,19 @@ Script cần API host Basculegion hiện tại, gồm `waitForState`, `getCellTy
 Bãi không có hai ô encounter liền kề có thể tới được sẽ bị bỏ qua; hết ứng viên
 sẽ dừng có lý do. Encounter ground trong nhà là suy luận từ dữ liệu Land/cell
 type, không phải bảng spawn từng ô từ server.
+
+### Spawn chỉ 4 vùng chính
+
+Index spawn chỉ giữ **Kanto, Johto, Hoenn, Sinnoh**: Route, hang, Safari và
+các khu gốc như Cinnabar, Seafoam, Mirage, Iron Island. Loại Love, Pinkan,
+Sevii và các khu expansion/event (kể cả Route 49/135 của Nap). Manifest dùng
+tên map chính xác, không suy luận từ tên file regional graph. Không xóa graph
+đi lại tới các đảo; chỉ giới hạn ứng viên spawn của Daily/hunt.
+
+Bản publish có **410 map / 3.961 dòng JSON / 3.960 dòng runtime / 490 Pokémon**.
+Giữ nguyên field/thứ tự của từng dòng hợp lệ, bao gồm Glameow/Floaroma Meadow
+và Torkoal/Stark Mountain Entrance Pt mới trên remote. Xem
+[Pathfinder/Spawn/README.md](Pathfinder/Spawn/README.md) để import/rebuild an toàn.
 
 ### Bug Catching tùy chọn
 
@@ -258,6 +274,14 @@ cần thiết của tuyến (Maze chỉ nối với Forest).
   Menu thiếu/mơ hồ hoặc slot Dig sai sẽ queue Cancel đã biết hoặc non-slot 0
   trước khi dừng để tránh host default 1. Server xử lý 0 chưa xác minh live;
   có thể cần tự đóng dialog. Không queue party slot khi chưa nhận diện đích.
+- Đích ghi rõ suffix `_A`/`_B` phải tới đúng node; cùng map vật lý không
+  còn được xem là hoàn thành sớm. Đích không suffix vẫn giữ cách dùng cũ.
+- Câu hỏi Dig và danh sách lựa chọn có thể tới ở hai callback riêng: chờ
+  choices authoritative rồi mới chọn outlet/party slot, không queue Cancel
+  chỉ vì callback câu hỏi chưa kèm menu. Reset trạng thái khi Stop/đổi cạnh.
+- Dòng nước Hoenn chỉ theo chiều Pacifidlog → Route 132 → 133 → 134 → Slateport;
+  bỏ cạnh/checkpoint đi ngược dòng, kể cả khi có Dive. Muốn quay về phía đông
+  dùng Route 131 hoặc dịch vụ hợp lệ.
 - Alias chính xác `Meteor Falls 1F 1R` → tên graph legacy `Meteor falls 1F 1R`,
   giữ phân biệt `_A`, `_B`, ...; không đổi tên mọi map một cách mù quáng.
 - Route 16 Stop House: cửa tây `(0,6)` → A/nhà Yorkie, cửa đông `(20,6)` → B.
@@ -281,6 +305,18 @@ Khi báo lỗi, gửi tên script/module đang nạp, map/node nguồn và đíc
 chơi, checkpoint bị lỗi và một đoạn log ngắn. Không gửi thông tin đăng nhập.
 
 ## Kiểm tra và đóng góp
+
+Kiểm tra spawn độc lập (Python 3; chạy từ thư mục repo, không cần host):
+
+```sh
+python -B Pathfinder/Spawn/optimize_spawn_data.py --check
+python -B tests/test_spawn_scope.py
+```
+
+Regression kiểm tra scope, JSON/Lua nhất quán, import map lạ bị loại và rebuild
+lặp ổn định trong thư mục tạm; không sửa dữ liệu đang dùng. Có thể truyền
+`tests/test_spawn_scope.py <Spawn-directory> <baseline-directory>` để so thêm
+từng field/thứ tự của các dòng được giữ với bản sao trước lọc.
 
 Bản publish đầu đã qua kiểm tra cú pháp MoonSharp **47/47 file Lua**, cấu hình
 default-only và parse JSON/Python. Không có bộ test live-server tự động trong repo.

@@ -3,7 +3,7 @@
 
 
 -- Slateport City
-mapLink["Slateport City"] = {["Slateport Harbor"] = {{42, 15}}, ["Slateport Shipyard 1F"] = {{39, 53}}, ["Mart Slateport"] = {{24, 37}}, ["Pokecenter Slateport"] = {{32, 25}}, ["Route 109"] = {{13, 90, 56, 90}}, ["Route 110_B"] = {{30, 0, 32, 0}}, ["Route 134"] = {{65, 4, 65, 16}}}
+mapLink["Slateport City"] = {["Slateport Harbor"] = {{42, 15}}, ["Slateport Shipyard 1F"] = {{39, 53}}, ["Mart Slateport"] = {{24, 37}}, ["Pokecenter Slateport"] = {{32, 25}}, ["Route 109"] = {{13, 90, 56, 90}}, ["Route 110_B"] = {{30, 0, 32, 0}}}
 -- Lilycove city
 mapLink["Lilycove City"] = {["Lilycove City Harbor"] = {{25, 38, 26, 38}}, ["Pokecenter Lilycove City"] = {{26, 20}}, ["Route 121"] = {{0, 22, 0, 23}}, ["Route 124_A"] = {{95, 18, 95, 19}}, ["Lilycove Department Store 1F"] = {{24, 7, 25, 7}}}
 mapLink["Lilycove Department Store 1F"] = {["Lilycove City"] = {{7, 12, 8, 12}}, ["Lilycove Department Store 2F"] = {{13, 7}}, ["Lilycove Department Store Elevator"] = {{2, 1}}}
@@ -95,11 +95,12 @@ mapLink["Route 130_A"] = {["Route 129_A"] = {{80, 7, 80, 43}}, ["Route 131"] = {
 -- Route 131
 mapLink["Route 131"] = {["Pacifidlog Town"] = {{0, 28, 0, 32}}, ["Route 130_A"] = {{80, 31, 80, 40}}, ["Sky Pillar Entrance_A"] = {{34, 1, 50, 1}}}
 -- Route 132
-mapLink["Route 132"] = {["Pacifidlog Town"] = {{100, 21, 100, 24}}, ["Route 133"] = {{0, 15, 0, 18}}}
+-- One-way currents, matching MapLink.lua; do not restore upstream exits.
+mapLink["Route 132"] = {["Route 133"] = {{0, 15, 0, 18}}}
 -- Route 133
-mapLink["Route 133"] = {["Route 132"] = {{90, 6, 90, 9}}, ["Route 134"] = {{0, 27, 0, 48}}}
+mapLink["Route 133"] = {["Route 134"] = {{0, 27, 0, 48}}}
 -- Route 134
-mapLink["Route 134"] = {["Route 133"] = {{55, 2, 55, 23}}, ["Slateport City"] = {{0, 6, 0, 19}}}
+mapLink["Route 134"] = {["Slateport City"] = {{0, 6, 0, 19}}}
 -- Fiery path
 mapLink["Fiery Path"] = {["Route 112_A"] = {{38, 8}}, ["Route 112_B"] = {{36, 49}}}
 -- Meteor Falls

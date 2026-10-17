@@ -91,7 +91,7 @@ HoennMap["Fallarbor House"] = {["Fallarbor Town"] = {1}}
 HoennMap["Fallarbor Town"] = {["Fallarbor House"] = {1}, ["Professor Cozmo House"] = {1}, ["Mart Fallarbor Town"] = {1}, ["Pokecenter Fallarbor Town"] = {1}, ["Route 113"] = {1}, ["Route 114"] = {1}}
 HoennMap["Professor Cozmo House"] = {["Fallarbor Town"] = {1}}
 -------------------------------------------------Slateport City-------------------------------------------------
-HoennMap["Slateport City"] = {["Crater Town Shore"] = {1}, ["Slateport Harbor"] = {1}, ["Slateport Museum 1F"] = {1}, ["Slateport Shipyard 1F"] = {1}, ["Slateport City House 2"] = {1}, ["Slateport City House 1"] = {1}, ["Mart Slateport"] = {1}, ["Pokecenter Slateport"] = {1}, ["Route 109"] = {1}, ["Route 110_B"] = {1}, ["Route 134"] = {1, {["abilities"] = {"dive"}}}}
+HoennMap["Slateport City"] = {["Crater Town Shore"] = {1}, ["Slateport Harbor"] = {1}, ["Slateport Museum 1F"] = {1}, ["Slateport Shipyard 1F"] = {1}, ["Slateport City House 2"] = {1}, ["Slateport City House 1"] = {1}, ["Mart Slateport"] = {1}, ["Pokecenter Slateport"] = {1}, ["Route 109"] = {1}, ["Route 110_B"] = {1}}
 HoennMap["Slateport Harbor"] = {["Slateport City"] = {1}}
 HoennMap["Slateport Museum 1F"] = {["Slateport Museum 2F"] = {1}, ["Slateport City"] = {1}}
 HoennMap["Slateport Museum 2F"] = {["Slateport Museum 1F"] = {1}}
@@ -308,9 +308,9 @@ HoennMap["Route 130 Underwater_B"] = {["Route 130_A"] = {1}}
 HoennMap["Route 130_A"] = {["Route 129_A"] = {2}, ["Route 131"] = {2}, ["Route 130 Underwater_B"] = {2, {["abilities"] = {"dive"}}}}
 HoennMap["Route 130_B"] = {["Route 130 Underwater_A"] = {1, {["abilities"] = {"dive"}}}}
 HoennMap["Route 131"] = {["Pacifidlog Town"] = {2}, ["Route 130_A"] = {2}, ["Sky Pillar Entrance_A"] = {2}}
-HoennMap["Route 132"] = {["Pacifidlog Town"] = {2}, ["Route 133"] = {2}}
-HoennMap["Route 133"] = {["Route 132"] = {2}, ["Route 134"] = {2}}
-HoennMap["Route 134"] = {["Route 133"] = {2}, ["Slateport City"] = {2}}
+HoennMap["Route 132"] = {["Route 133"] = {2}}
+HoennMap["Route 133"] = {["Route 134"] = {2}}
+HoennMap["Route 134"] = {["Slateport City"] = {2}}
 HoennMap["Berry Garden"] = {["Route 123_C"] = {1}}
 -------------------------------------------------Victory Road-------------------------------------------------
 HoennMap["Ever Grande City_A"] = {["Pokecenter Ever Grande City"] = {1}, ["Ever Grande City_B"] = {1, {["abilities"] = {"dig"}}}, ["Route 128"] = {1, {["abilities"] = {"surf"}}}, ["Victory Road Hoenn 1F_A"] = {1}}

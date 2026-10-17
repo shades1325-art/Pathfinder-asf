@@ -1,5 +1,12 @@
 -- Daily-only routing/patrol policy. Pathfinder and the Core still own all movement.
 local Hunt = {}
+-- Four encounter cells total, i.e. at most three steps between endpoints.
+local MAX_PATROL_CELLS = 4
+-- The cached Sky Pillar 3F map has Outside=true but no grass; its existing
+-- Land spawn rows use plain floor. Outside describes map presentation, not
+-- encounter terrain. Keep this evidence-backed exception scoped to that floor
+-- rather than assuming every outdoor town's normal ground has encounters.
+local normalGroundLandMaps = {["Sky Pillar 3F"] = true}
 
 function Hunt.new(pf, spawns, graph, submaps)
     local self = { blockedEdges = {}, rejected = {}, badCells = {} }
@@ -103,7 +110,8 @@ function Hunt.new(pf, spawns, graph, submaps)
         end
         collect()
         -- Cave encounters use normal ground. Never roam arbitrary outdoor ground.
-        if #cells == 0 and terrain == "Grass" and not isOutside() then
+        if #cells == 0 and terrain == "Grass"
+            and (not isOutside() or normalGroundLandMaps[getMapName()]) then
             terrain = "Normal Ground"
             collect()
         end
@@ -119,12 +127,16 @@ function Hunt.new(pf, spawns, graph, submaps)
     end
     local function patrol()
         if self.patrol then
-            local a, b = self.patrol[1], self.patrol[2]
-            if validCell(a.x, a.y, self.terrain) and validCell(b.x, b.y, self.terrain) then
+            local a, b = self.patrol[1], self.patrol[#self.patrol]
+            local valid = true
+            for _,cell in ipairs(self.patrol) do
+                if not validCell(cell.x,cell.y,self.terrain) then valid=false; break end
+            end
+            if valid then
                 local dest = getPlayerX() == a.x and getPlayerY() == a.y and b or a
-                local onPatrol = (getPlayerX() == a.x and getPlayerY() == a.y)
-                    or (getPlayerX() == b.x and getPlayerY() == b.y)
-                if (onPatrol or safePath(dest.x, dest.y)) and moveToCell(dest.x, dest.y) then return true end
+                -- Longer legs must not let Core's recalculated approach cross
+                -- an exit/other region, even when starting on an endpoint.
+                if safePath(dest.x, dest.y) and moveToCell(dest.x, dest.y) then return true end
                 self.badCells[key(dest.x, dest.y)] = true
                 self.patrol, self.cells = nil, nil
                 return waitForState(250)
@@ -139,27 +151,36 @@ function Hunt.new(pf, spawns, graph, submaps)
             local a = self.cells[i]
             self.cursor = i + 1
             if validCell(a.x, a.y, self.terrain) then
+                local strip
                 for _, d in ipairs(directions) do
-                    local b = { x = a.x + d[1], y = a.y + d[2] }
-                    if validCell(b.x, b.y, self.terrain) then
-                        local dest = getPlayerX() == a.x and getPlayerY() == a.y and b or a
-                        if safePath(dest.x, dest.y) then
-                            if moveToCell(dest.x, dest.y) then
-                                self.patrol = { a, b }
-                                log(string.format("Daily Solaceon: patrol %s (%d,%d) <-> (%d,%d).",
-                                    self.target.node, a.x, a.y, b.x, b.y))
-                                return true
-                            end
-                            self.badCells[key(dest.x, dest.y)] = true
-                            return waitForState(250)
+                    local candidate = {a}
+                    for offset=1,MAX_PATROL_CELLS-1 do
+                        local cell={x=a.x+d[1]*offset,y=a.y+d[2]*offset}
+                        if not validCell(cell.x,cell.y,self.terrain) then break end
+                        candidate[#candidate+1]=cell
+                    end
+                    if #candidate>=2 and (not strip or #candidate>#strip) then strip=candidate end
+                end
+                if strip then
+                    local b=strip[#strip]
+                    local dest = getPlayerX() == a.x and getPlayerY() == a.y and b or a
+                    if safePath(dest.x, dest.y) then
+                        if moveToCell(dest.x, dest.y) then
+                            self.patrol = strip
+                            log(string.format("Daily Solaceon: patrol %s (%d,%d) <-> (%d,%d), %d cells (limit %d).",
+                                self.target.node, a.x, a.y, b.x, b.y,#strip,MAX_PATROL_CELLS))
+                            return true
                         end
-                        break
+                        self.badCells[key(dest.x, dest.y)] = true
+                        return waitForState(250)
                     end
                 end
             end
         end
         if self.cursor <= #self.cells then return waitForState(1) end
-        log("Daily Solaceon: no reachable encounter patrol on " .. self.target.node .. "; selecting another node.")
+        log("Daily Solaceon: no reachable encounter patrol on " .. self.target.node
+            .. "; terrain="..tostring(self.terrain).."; candidates="..#self.cells
+            .. "; outside="..tostring(isOutside()).."; selecting another node.")
         self.rejected[self.target.node], self.target = true, nil
         resetPatrol()
         return waitForState(1)

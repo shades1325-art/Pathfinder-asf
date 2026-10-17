@@ -3,6 +3,63 @@
 Chỉ ghi các thay đổi có trong repo này. Nền thư viện vẫn mang version 2.6.5;
 ngày bên dưới là ngày publish, không phải version mới của client.
 
+## 2026-10-18 — Daily patrol 4 ô, mainland spawn và sửa tuyến
+
+### Daily / Sky Pillar
+
+- Patrol từ cặp 2 ô thành dải thẳng tối đa 4 ô; bãi hẹp dùng 2–3 ô. Kiểm tra
+  mọi ô giữa và đường tiếp cận: đúng subnode/terrain, không NPC/map link.
+  Giữ ngân sách local-path mỗi callback, không thêm sleep giữa các bước.
+- Sky Pillar 3F được dùng Normal Ground khi không có grass, dù Outside=true.
+  Ngoại lệ chỉ cho floor có bằng chứng cache/Land spawn này; không roam mọi
+  outdoor town. Giữ điều kiện giờ/membership và Spiritomb member-only.
+
+### Spawn Kanto / Johto / Hoenn / Sinnoh
+
+- Thêm manifest tên map chính xác `MainlandMapScope.json` và hướng dẫn import.
+  Giữ Route/hang/Safari/khu gốc; bỏ Love/Pinkan/Sevii và expansion/event,
+  bao gồm Route 49/135 của Nap. Không xóa graph/checkpoint tới đảo.
+- Lọc dữ liệu remote hiện tại: **5.429 → 3.961 dòng JSON**, loại 161 map /
+  1.468 dòng; còn **410 map, 3.960 dòng runtime / 490 Pokémon**.
+  Giữ nguyên field/order của mọi dòng còn lại, gồm hai spawn mới trên remote:
+  Glameow/Floaroma Meadow và Torkoal/Stark Mountain Entrance Pt.
+- Optimizer áp dụng manifest cả khi rebuild sau import, có `--check` chỉ đọc
+  và `--report` tùy chọn. Thêm regression Python portable kiểm tra JSON/Lua,
+  scope, import tương lai và idempotency; SpawnEditor chưa tự lọc manifest.
+
+### Điều hướng / hội thoại
+
+- Đích có suffix `_A`/`_B` phải khớp đúng node, không hoàn thành sớm chỉ vì
+  cùng map vật lý; không đổi hành vi đích generic không suffix.
+- Dig: câu hỏi và choices có thể ở callback/frame riêng. Không queue Cancel
+  khi mới nhận câu hỏi, chỉ chọn outlet từ menu authoritative rồi tới party
+  slot; reset pending khi Stop/đổi cạnh, không dùng lựa chọn từ dialog cũ.
+- Đồng bộ graph/MapLink/template chiều dòng nước Hoenn: Pacifidlog → 132 →
+  133 → 134 → Slateport. Bỏ các cạnh ngược dòng, không bỏ kiểm tra HM/items.
+
+### Phạm vi publish
+
+- Merge có chọn lọc trên remote mới nhất; giữ dữ liệu Mineral/Historical/Feral,
+  CellCrawl và các sửa checkpoint không liên quan của contributor.
+- Không kèm Accounts, Logs, backups, settings cá nhân hay script riêng.
+  Không sửa Core/protocol/auth/Lua API; không ghi đè workspace người dùng.
+- Kiểm tra offline trên chính clone publish; chưa xác minh live-server sau
+  bản publish này. Stop → Load lại script → Start để bỏ module require cache.
+
+### Kiểm tra bản publish
+
+- MoonSharp compile **53/53 file Lua**; spawn Python/optimizer read-only,
+  baseline field/order, import guard/idempotency và lazy Lua iteration PASS.
+- Daily/full dependency smoke, lịch DigRework, actionable route, item readiness,
+  Hoenn currents, navigation logs và transport progress PASS trên clone này.
+- Fixture Lua Dig split-menu, Floaroma, Route 16 và Meteor alias PASS; đây là
+  phần Lua của các runner host, không phải toàn bộ kiểm tra packet/cache của chúng.
+- Cache Sky Pillar 3F với Core .NET 10: Outside=true, 0 grass, 76 normal-ground;
+  từ `(7,5)` và `(11,11)` đều patrol 4 ô qua 12 action local, không travel,
+  từng leg hợp lệ với Core pathfinding. Không suy đoán NPC live từ cache.
+- Host Avalonia Desktop Debug/Release `win-x64` build PASS, 0 warnings/errors,
+  output riêng; mã host và gói ứng dụng không nằm trong commit này.
+
 ## 2026-10-13 — Bug Catching, Dig Coronet/Mt. Silver và transport progress
 
 ### Bug Catching daily tùy chọn

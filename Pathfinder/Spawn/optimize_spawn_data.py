@@ -16,6 +16,31 @@ from pathlib import Path
 
 
 SOURCE_FILES = (("LandSpawn.json", "Land"), ("SurfSpawn.json", "Surf"))
+MAP_SCOPE_FILE = "MainlandMapScope.json"
+
+
+def load_map_scope(root):
+    """Exact reviewed map allowlist. No graph-region or name-prefix guesses.
+
+    Older bundles without a scope manifest retain their previous exporter
+    behavior. This primary bundle ships the manifest alongside its JSON.
+    """
+    path = root / MAP_SCOPE_FILE
+    if not path.exists():
+        return None
+    policy = json.loads(path.read_text(encoding="utf-8-sig"))
+    regions = policy.get("regions", {})
+    if policy.get("schemaVersion") != 1 or set(regions) != {"Kanto", "Johto", "Hoenn", "Sinnoh"}:
+        raise ValueError("Invalid mainland spawn map-scope manifest")
+    allowed = set()
+    for region, maps in regions.items():
+        if not isinstance(maps, list) or not maps or any(not isinstance(m, str) or not m.strip() for m in maps):
+            raise ValueError("Empty/invalid map allowlist for " + region)
+        for name in maps:
+            if name in allowed:
+                raise ValueError("Duplicate map in scope manifest: " + name)
+            allowed.add(name)
+    return allowed
 
 # Server spawn rotations can invalidate an individual database row before the
 # upstream spawn export is refreshed. Keep those known-stale rows out of both
@@ -219,36 +244,59 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", type=Path,
                         default=Path(__file__).resolve().parent)
+    parser.add_argument("--check", action="store_true",
+                        help="Read-only: exit nonzero if source JSON needs scope/dedup cleanup")
+    parser.add_argument("--report", type=Path,
+                        help="Write row counts and excluded-map audit as JSON")
     args = parser.parse_args()
     root = args.directory.resolve()
+    allowed_maps = load_map_scope(root)
 
     sources = []
     removed = 0
     original_count = 0
+    audit = {}
     for filename, map_type in SOURCE_FILES:
         path = root / filename
         rows = json.loads(path.read_text(encoding="utf-8-sig"))
         original_count += len(rows)
-        optimized = deduplicate(rows)
+        scoped = [row for row in rows if allowed_maps is None or row.get("Map") in allowed_maps]
+        excluded_maps = {}
+        for row in rows:
+            if allowed_maps is not None and row.get("Map") not in allowed_maps:
+                name = str(row.get("Map") or "")
+                excluded_maps[name] = excluded_maps.get(name, 0) + 1
+        optimized = deduplicate(scoped)
+        audit[filename] = {"before": len(rows), "after": len(optimized),
+                           "scopeRemoved": len(rows) - len(scoped),
+                           "excludedMaps": dict(sorted(excluded_maps.items()))}
         removed += len(rows) - len(optimized)
-        path.write_text(
-            json.dumps(optimized, ensure_ascii=False, separators=(",", ":")) + "\n",
-            encoding="utf-8", newline="\n")
+        if not args.check:
+            path.write_text(
+                json.dumps(optimized, ensure_ascii=False, separators=(",", ":")) + "\n",
+                encoding="utf-8", newline="\n")
         sources.append((map_type, optimized))
 
     grouped = build_runtime_rows(sources)
-    write_spawn_data(root / "SpawnData.lua", grouped)
+    if not args.check:
+        write_spawn_data(root / "SpawnData.lua", grouped)
+    if args.report:
+        args.report.write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     runtime_count = sum(len(rows) for rows in grouped.values())
     high_volume = sorted(
         ((name, len(rows)) for name, rows in grouped.items() if len(rows) > 64),
         key=lambda item: (-item[1], item[0]))
-    print("JSON rows: {} -> {} (removed {} duplicates)".format(
+    print("JSON rows: {} -> {} (removed {} scope/stale/duplicate rows)".format(
         original_count, original_count - removed, removed))
     print("Runtime rows: {}; Pokemon: {}".format(runtime_count, len(grouped)))
+    if allowed_maps is not None:
+        print("Mainland map scope: {}; allowed maps: {}".format(MAP_SCOPE_FILE, len(allowed_maps)))
     if high_volume:
         print("High-volume Pokemon (>64 rows): " + ", ".join(
             "{}={}".format(name, count) for name, count in high_volume))
+    if args.check and removed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

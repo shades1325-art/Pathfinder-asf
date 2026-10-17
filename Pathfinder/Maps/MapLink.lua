@@ -741,7 +741,7 @@ mapLink["Oldale Town House 1"] = {["Oldale Town"] = {{3, 12}}}
 mapLink["Oldale Town House 2"] = {["Oldale Town"] = {{3, 12}}}
 mapLink["Mart Oldale Town"] = {["Oldale Town"] = {{3, 11}}}
 -- Slateport City
-mapLink["Slateport City"] = {["Slateport Harbor"] = {{42, 15}}, ["Slateport Shipyard 1F"] = {{39, 53}}, ["Mart Slateport"] = {{24, 37}}, ["Pokecenter Slateport"] = {{32, 25}}, ["Route 109"] = {{13, 90, 56, 90}}, ["Route 110_B"] = {{30, 0, 32, 0}}, ["Route 134"] = {{65, 4, 65, 16}}}
+mapLink["Slateport City"] = {["Slateport Harbor"] = {{42, 15}}, ["Slateport Shipyard 1F"] = {{39, 53}}, ["Mart Slateport"] = {{24, 37}}, ["Pokecenter Slateport"] = {{32, 25}}, ["Route 109"] = {{13, 90, 56, 90}}, ["Route 110_B"] = {{30, 0, 32, 0}}}
 -- Fallarbor Town
 mapLink["Fallarbor Town"] = {["Mart Fallarbor Town"] = {{31, 24}}, ["Pokecenter Fallarbor Town"] = {{30, 12}}, ["Route 113"] = {{40, 9, 40, 22}}, ["Route 114"] = {{0, 18, 0, 19}}}
 -- Lavaridge Town
@@ -937,11 +937,11 @@ mapLink["Route 130_B"] = {["Route 130 Underwater_A"] = {{15, 6}}}
 -- Route 131
 mapLink["Route 131"] = {["Pacifidlog Town"] = {{0, 28, 0, 32}}, ["Route 130_A"] = {{80, 31, 80, 40}}, ["Sky Pillar Entrance_A"] = {{34, 1, 50, 1}}}
 -- Route 132
-mapLink["Route 132"] = {["Pacifidlog Town"] = {{100, 21, 100, 24}}, ["Route 133"] = {{0, 15, 0, 18}}}
+mapLink["Route 132"] = {["Route 133"] = {{0, 15, 0, 18}}}
 -- Route 133
-mapLink["Route 133"] = {["Route 132"] = {{90, 6, 90, 9}}, ["Route 134"] = {{0, 27, 0, 48}}}
+mapLink["Route 133"] = {["Route 134"] = {{0, 27, 0, 48}}}
 -- Route 134
-mapLink["Route 134"] = {["Route 133"] = {{55, 2, 55, 23}}, ["Slateport City"] = {{0, 6, 0, 19}}}
+mapLink["Route 134"] = {["Slateport City"] = {{0, 6, 0, 19}}}
 
 -- Route 135
 mapLink["Route 135"] = {["Nap Town"] = {{34, 0, 39, 0}}, ["Route 125"] = {{32, 87, 36, 87}}}
