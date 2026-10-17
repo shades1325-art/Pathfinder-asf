@@ -826,6 +826,7 @@ mapLink["Victory Road Hoenn B2F_C"] = {["Victory Road Hoenn B2F_F"] = {{14, 24, 
 mapLink["Victory Road Hoenn B2F_D"] = {["Victory Road Hoenn B2F_C"] = {{14, 25, 18, 25}}, ["Victory Road Hoenn B2F_A"] = {{4, 7, 9, 7}}, ["Victory Road Hoenn B2F_F"] = {{10, 16, 14, 16}}}
 mapLink["Victory Road Hoenn B2F_E"] = {["Victory Road Hoenn B2F_F"] = {{24, 17, 28, 17}}, ["Victory Road Hoenn B1F_B"] = {{26, 14}}}
 mapLink["Victory Road Hoenn B2F_F"] = {["Victory Road Hoenn B2F_E"] = {{24, 16, 28, 16}}}
+mapLink["Hoenn Safari Zone Lobby"] = {["Route 121"] = {{5, 15}}}
 -- Abandoned Ship
 mapLink["Abandoned Ship 1F_A"] = {["Abandoned Ship B1F"] = {{23, 4}}, ["Abandoned Ship 1F Room 2_A"] = {}, ["Abandoned Ship 1F Room 2_B"] = {}, ["Abandoned Ship Exterior_A"] = {{13, 12, 14, 12}}}
 mapLink["Abandoned Ship B1F Room 1"] = {["Abandoned Ship B1F"] = {{14, 10, 15, 10}}}
