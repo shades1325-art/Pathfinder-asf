@@ -734,10 +734,6 @@ return {
         ["Lavaridge Town Gym B1F_I"] = {{22, 38, 28, 40}, {28, 29, 31, 37}}, -- bottom right(bottom)
         ["Lavaridge Town Gym B1F_J"] = {{4, 29, 4, 29}},
     },
-    ["Mineral Site"] = {
-        ["Mineral Site_A"] = {{3, 1, 23, 13}, {3, 14, 4, 16}, {11, 14, 22, 15}}, -- top
-        ["Mineral Site_B"] = {{5, 16, 25, 18}, {1, 18, 4, 18}, {23, 14, 25, 15}}, -- bottom
-    },
     ["Feral Site"] = {
         -- Current live map: A is the entrance/cart component (8,8 / 11,11 / 19,22).
         -- B is the isolated lower component entered at 19,24.  Keep these exact
